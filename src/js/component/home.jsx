@@ -4,15 +4,31 @@ import React, { useState } from "react";
 
 //create your first component
 const Home = () => {
-	const [inputValue, setInputValue] = useState("");
-
-	const validateInput = (event) => {
-		if (inputValue === "") {
-			alert("The input cannot be empty");
-		}
-		if (event.key === "ENTER") {
+	const [newItem, setNewItem] = useState("");
+	const [todo, setTodo] = useState([]);
+	const [counter, setCounter] = useState(0);
+	const addTodo = (e) => {
+		if (newItem === "") {
 			return;
 		}
+		if (e.key === "Enter") {
+			const item = {
+				id: Math.floor(Math.random() * 1000),
+				value: newItem,
+			};
+			setTodo((list) => [...list, item]);
+			setCounter((count) => count + 1);
+			setNewItem("");
+		}
+	};
+
+	const deleteItem = (id) => {
+		const newArray = todo.filter((item) => item.id !== id);
+		setTodo(newArray);
+	};
+
+	const decreaseItem = () => {
+		setCounter((count) => count - 1);
 	};
 	return (
 		<div className="main-container">
@@ -21,23 +37,31 @@ const Home = () => {
 				<input
 					type="text"
 					className="add-todo"
-					placeholder="add a new to do"
+					placeholder="Add a new todo"
 					onChange={(e) => {
-						setInputValue(e.target.value);
+						setNewItem(e.target.value);
 					}}
-					value={inputValue}
-					onKeyPress={inputValue}
+					value={newItem}
+					onKeyPress={addTodo}
 				/>
 				<ul className="group-list">
-					{inputValue !== "" ? (
-						<li className="items">
-							{setInputValue(e.target.value)}
-							<button className="delete-item">X</button>
-						</li>
-					) : (
-						alert("The input cannot be empty")
-					)}
+					{todo.map((item) => {
+						return (
+							<li className="items" key={item.id}>
+								{item.value}
+								<button
+									className="delete-item"
+									onClick={() => {
+										deleteItem(item.id);
+										decreaseItem();
+									}}>
+									X
+								</button>
+							</li>
+						);
+					})}
 				</ul>
+				<h5>{`${counter} items left`}</h5>
 			</div>
 		</div>
 	);
