@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //include images into your bundle
 
@@ -7,6 +7,26 @@ const Home = () => {
 	const [newItem, setNewItem] = useState("");
 	const [todo, setTodo] = useState([]);
 	const [counter, setCounter] = useState(0);
+
+	useEffect(() => {
+		fetch("https://assets.breatheco.de/apis/fake/todos/user/franklobo", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((response) => {
+				if (!response.ok) throw new Error();
+				return response.json();
+			})
+			.then((data) => {
+				setTodo(data);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	}, []);
+
 	const addTodo = (e) => {
 		if (newItem === "") {
 			return;
