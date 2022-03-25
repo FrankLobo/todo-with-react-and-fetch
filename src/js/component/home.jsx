@@ -1,24 +1,45 @@
 import React, { useState, useEffect } from "react";
 
-//include images into your bundle
-
-//create your first component
 const Home = () => {
 	const [newItem, setNewItem] = useState("");
-	const [todo, setTodo] = useState([]);
-	const [counter, setCounter] = useState(0);
-	// useEffect(() => {
-	// 	sendTodos();
-	// 	// , getTodos(), updateTodos(), deleteTodos()
-	// }, [todo]);
+	const [todos, setTodos] = useState([]);
 
-	const deleteItem = (id) => {
-		const newArray = todo.filter((item) => item.id !== id);
-		setTodo(newArray);
+	useEffect(() => {
+		getTodos();
+	}, [newItem]);
+
+	const sendTodos = async (result) => {
+		const response = await fetch(
+			"https://assets.breatheco.de/apis/fake/todos/user/franklobo",
+			{
+				method: "PUT",
+				body: JSON.stringify(result),
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		);
+		const data = await response.json();
+		console.log(data);
+	};
+	const getTodos = async () => {
+		const response = await fetch(
+			"https://assets.breatheco.de/apis/fake/todos/user/franklobo",
+			{
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		);
+		const data = await response.json();
+		setTodos(data);
 	};
 
-	const decreaseItem = () => {
-		setCounter((count) => count - 1);
+	const deleteItem = (ind) => {
+		const newArray = todos.filter((element, index) => index !== ind);
+		setTodos(newArray);
+		sendTodos(newArray);
 	};
 
 	const addTodo = (e) => {
@@ -26,91 +47,14 @@ const Home = () => {
 			return;
 		}
 		if (e.key === "Enter") {
-			const item = {
-				id: Math.floor(Math.random() * 1000),
-				value: newItem,
+			const task = {
+				label: newItem,
+				done: false,
 			};
-			setTodo((list) => [...list, item]);
-			setCounter((count) => count + 1);
+			sendTodos([...todos, task]);
 			setNewItem("");
 		}
 	};
-
-	// const sendTodos = () => {
-	// 	fetch("https://assets.breatheco.de/apis/fake/todos/user/franklobo", {
-	// 		method: "POST",
-	// 		body: [],
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	})
-	// 		.then((response) => {
-	// 			if (!response.ok) throw new Error();
-	// 			return response.json();
-	// 		})
-	// 		.then((todo) => {
-	// 			setTodo(todo);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.log(error);
-	// 		});
-	// };
-	// const getTodos = () => {
-	// 	fetch("https://assets.breatheco.de/apis/fake/todos/user/franklobo", {
-	// 		method: "GET",
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	})
-	// 		.then((response) => {
-	// 			if (!response.ok) throw new Error();
-	// 			return response.json();
-	// 		})
-	// 		.then((data) => {
-	// 			setTodo(data);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.log(error);
-	// 		});
-	// };
-	// const updateTodos = () => {
-	// 	fetch("https://assets.breatheco.de/apis/fake/todos/user/franklobo", {
-	// 		method: "PUT",
-	// 		body: JSON.stringify(data),
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	})
-	// 		.then((response) => {
-	// 			if (!response.ok) throw new Error();
-	// 			return response.json();
-	// 		})
-	// 		.then((data) => {
-	// 			setTodo(data);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.log(error);
-	// 		});
-	// };
-	// const deleteTodos = () => {
-	// 	fetch("https://assets.breatheco.de/apis/fake/todos/user/franklobo", {
-	// 		method: "DELETE",
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 	})
-	// 		.then((response) => {
-	// 			if (!response.ok) throw new Error();
-	// 			return response.json();
-	// 		})
-	// 		.then((data) => {
-	// 			setTodo(data);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.log(error);
-	// 		});
-	// };
-
 	return (
 		<div className="main-container">
 			<h1 className="text-center mt-5">TODOS</h1>
@@ -123,26 +67,29 @@ const Home = () => {
 						setNewItem(e.target.value);
 					}}
 					value={newItem}
-					onKeyPress={addTodo}
+					onKeyPress={(e) => addTodo(e)}
 				/>
 				<ul className="group-list">
-					{todo.map((item) => {
-						return (
-							<li className="items" key={item.id}>
-								{item.value}
-								<button
-									className="delete-item"
-									onClick={() => {
-										deleteItem(item.id);
-										decreaseItem();
-									}}>
-									X
-								</button>
-							</li>
-						);
-					})}
+					{Array.isArray(todos) &&
+						todos !== undefined &&
+						todos?.map((task, index) => {
+							return (
+								<li className="items" key={index}>
+									{task.label}
+									<button
+										className="delete-item"
+										onClick={() => {
+											deleteItem(index);
+										}}>
+										X
+									</button>
+								</li>
+							);
+						})}
 				</ul>
-				<h5>{`${counter} items left`}</h5>
+				<h5>{`${
+					Array.isArray(todos) && todos !== undefined && todos.length
+				} items left`}</h5>
 			</div>
 		</div>
 	);
